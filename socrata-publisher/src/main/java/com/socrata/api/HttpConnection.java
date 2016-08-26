@@ -47,10 +47,15 @@ public class HttpConnection implements Connection
     public WebResource.Builder resource(String url, MultivaluedMap<String, String> params)
     {
         Client client = Client.create();
-        WebResource r = client.resource(url).queryParams(params);
+        String fullURL;
+
+        if(url.startsWith("http:") || url.startsWith("https:")) fullURL = url;
+        else if(url.startsWith("/")) fullURL = "https://" + domain + url;
+        else fullURL = "https://" + domain + "/" + url;
+
+        WebResource r = client.resource(fullURL).queryParams(params);
         return r.
                 accept("application/json").
-                header("X-Socrata-Host", domain).
                 header("Authorization", "Basic " + new BASE64Encoder().encode((user + ":" + password).getBytes())).
                 header("X-App-Token", apptoken);
     }
